@@ -9,4 +9,4 @@ router: Router = Router()
 # не предусмотренные логикой работы бота
 @router.message()
 async def send_echo(message: Message):
-    await message.answer(f'{LEXICON_RU["dont_understand"]} {message.text}')
+    await message.answer(f'{LEXICON_RU["dont_understand"]} "{message.text}"')

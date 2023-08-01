@@ -9,9 +9,11 @@ from db.crud import check_user_in_db
 
 from lexicon.lexicon_ru import LEXICON_RU, LEXICON_CALENDAR
 
-from keyboards.calendar_keyboard import create_calendar_keyboard, create_edit_day_keyboard
+from keyboards.calendar_keyboard import create_calendar_keyboard, create_edit_day_keyboard, \
+    create_addresses_day_keyboard
 
-from callback_classes.callback_classes import CallBackMonthForward, CallBackMonthBack, CallBackDay
+from callback_classes.callback_classes import CallBackMonthForward, CallBackMonthBack, CallBackDay, \
+    CallBackShowAddresses, CallBackCloseDay
 
 from settings import current_year, current_month
 
@@ -22,7 +24,8 @@ router: Router = Router()
 @router.message(Command(commands='calendar'), StateFilter(default_state))
 async def process_calendar_command(message: Message):
     if await check_user_in_db(message.from_user.id):
-        await message.answer(text=LEXICON_CALENDAR['title'], reply_markup=create_calendar_keyboard(current_year, current_month))
+        await message.answer(text=LEXICON_CALENDAR['title'],
+                             reply_markup=create_calendar_keyboard(current_year, current_month))
     else:
         await message.answer(text=LEXICON_RU['not_registered_user'])
 
@@ -52,3 +55,21 @@ async def process_selected_day(callback: CallbackQuery, callback_data: CallBackD
         await callback.message.edit_text(text='редактирование дня',
                                          reply_markup=create_edit_day_keyboard(callback_data.year, callback_data.month,
                                                                                callback_data.day))
+
+
+@router.callback_query(CallBackShowAddresses.filter())
+async def process_address_command(callback: CallbackQuery, callback_data: CallBackShowAddresses):
+    tg_id = callback.from_user.id
+    await callback.message.edit_text(text=f'Адреса за {callback_data.day}'
+                                          f'/{callback_data.month}'
+                                          f'/{callback_data.year}\n'
+                                          f'Нажмите на адрес, чтобы удалить, или изменить',
+                                     reply_markup=create_addresses_day_keyboard(tg_id, callback_data.year,
+                                                                                callback_data.month,
+                                                                                callback_data.day))
+
+
+@router.callback_query(CallBackCloseDay.filter())
+async def process_close_day(callback: CallbackQuery):
+    await callback.message.edit_text(text=LEXICON_CALENDAR['title'],
+                                     reply_markup=create_calendar_keyboard(current_year, current_month))

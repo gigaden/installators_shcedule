@@ -12,7 +12,23 @@ class CallBackMonthBack(CallbackData, prefix='<<<'):
     year: int
 
 
-class CallBackDay(CallbackData, prefix="selected_date"):
+class CallBackDay(CallbackData, prefix='selected_date'):
     year: int
     month: int
     day: int
+
+
+class CallBackAddress(CallbackData, prefix='address'):
+    year: int
+    month: int
+    day: int
+
+
+class CallBackShowAddresses(CallbackData, prefix='show_addresses'):
+    year: int
+    month: int
+    day: int
+
+
+class CallBackCloseDay(CallbackData, prefix='close_day_btn'):
+    ...

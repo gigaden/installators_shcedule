@@ -95,20 +95,18 @@ async def process_dogovor_sent(message: Message, state: FSMContext):
 @router.message(StateFilter(FSMFillForm.fill_filial))
 async def process_filial_sent(message: Message, state: FSMContext):
     await state.update_data(filial=message.text)
+    await message.answer(text=LEXICON_RU['/fillform_filial_addresses'])
+    await state.set_state(FSMFillForm.fill_filial_addresses)
+
+
+# сработает при корректном вводе адреса филиала
+@router.message(StateFilter(FSMFillForm.fill_filial_addresses))
+async def process_filial_sent(message: Message, state: FSMContext):
+    await state.update_data(filial_address=message.text)
     await state.update_data(tg_id=message.from_user.id)
 
     user_data: dict = await state.get_data()
     # заносим в бд
     await create_new_user(user_data)
-    print(user_data)
-    await message.answer(text=f"{user_data['fio']}\n"
-                              f"{user_data['car_num']}\n"
-                              f"{user_data['car_model']}\n"
-                              f"{user_data['dogovor']}\n"
-                              f"{user_data['filial']}\n"
-                              f"{message.from_user.id}\n"
-                              f"{LEXICON_RU['/fillform_finish']}")
+    await message.answer(text=LEXICON_RU['user_created'])
     await state.clear()
-
-
-

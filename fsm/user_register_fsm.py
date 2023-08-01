@@ -8,6 +8,7 @@ class FSMFillForm(StatesGroup):
     fill_car_model = State()
     fill_dogovor = State()
     fill_filial = State()
+    fill_filial_addresses = State()
 
 
 class FSMFillAddresses(StatesGroup):

@@ -24,6 +24,7 @@ class Users(Base):
     car_model = Column(String(50), nullable=False)
     dogovor = Column(String(50), nullable=False)
     filial = Column(String(80), nullable=False)
+    filial_address = Column(String(300), nullable=True)
     created_on = Column(DateTime(), default=datetime.now)
     updated_on = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
     days = relationship('Days')
@@ -42,8 +43,10 @@ class Addresses(Base):
     __tablename__ = 'addresses'
     id = Column(Integer, primary_key=True)
     users_id = Column(Integer, ForeignKey('users.id'))
-    address_count = Column(Integer, autoincrement=True)
     date = Column(DateTime, nullable=False, default=None)
     address = Column(String(300), nullable=False)
+    coordinates = Column(String(100), nullable=False)
+    full_address = Column(String(300), nullable=False)
 
-# Base.metadata.create_all(engine)
+
+#Base.metadata.create_all(engine)

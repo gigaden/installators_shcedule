@@ -3,8 +3,11 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import calendar
 import locale
 
-from callback_classes.callback_classes import CallBackMonthForward, CallBackMonthBack, CallBackDay
+from callback_classes.callback_classes import CallBackMonthForward, CallBackMonthBack, CallBackDay, CallBackAddress, \
+    CallBackShowAddresses, CallBackCloseDay
 from lexicon.lexicon_ru import LEXICON_CALENDAR
+
+from db.crud import get_addresses
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -43,10 +46,22 @@ def create_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
 def create_edit_day_keyboard(year: int, month: int, day: int) -> InlineKeyboardMarkup:
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
     address: InlineKeyboardButton = InlineKeyboardButton(text=LEXICON_CALENDAR['add_address_btn'],
-                                                         callback_data='/address')
+                                                         callback_data=CallBackAddress(year=year, month=month,
+                                                                                       day=day).pack())
     close: InlineKeyboardButton = InlineKeyboardButton(text=LEXICON_CALENDAR['close_address_btn'],
-                                                       callback_data='/close_day_btn')
-    kb_builder.row(address, close, width=1)
+                                                       callback_data=CallBackCloseDay().pack())
+    addresses: InlineKeyboardButton = InlineKeyboardButton(text=LEXICON_CALENDAR['show_addresses'],
+                                                           callback_data=CallBackShowAddresses(year=year, month=month,
+                                                                                               day=day).pack())
+    kb_builder.row(address, close, addresses, width=1)
 
     return kb_builder.as_markup()
 
+
+# формируем клавиатуру для показа всех адресов за выбранный день
+def create_addresses_day_keyboard(tg_id: int, year: int, month: int, day: int) -> InlineKeyboardMarkup:
+    addresses: list = get_addresses(tg_id, year, month, day)
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    addresses_button = [InlineKeyboardButton(text=f"{LEXICON_CALENDAR['del']} {address[-50:]}", callback_data=address[:20]) for address in addresses]
+    kb_builder.row(*addresses_button, width=1)
+    return kb_builder.as_markup()

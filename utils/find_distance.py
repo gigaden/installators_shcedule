@@ -1,6 +1,11 @@
 from geopy.geocoders import Nominatim  # Подключаем библиотеку
 from geopy.distance import geodesic, great_circle, distance  # И дополнения
 
+from environs import Env
+
+env = Env()
+env.read_env()
+
 geolocator = Nominatim(user_agent="Tester")  # Указываем название приложения
 # address_1 = str(input('Введите город 1: \n'))  # Получаем название первого города
 address_1 = 'нижний новгород, волжская набережная 8'
@@ -20,7 +25,7 @@ gps_point_2 = location_2.latitude, location_2.longitude  # Выводим коо
 #       great_circle(gps_point_1, gps_point_2).kilometers, ' километров')  # Выводим полученный результат в километрах
 # print(distance(gps_point_1, gps_point_2).km)
 
-token = '5b3ce3597851110001cf6248d30dd111ec434d0d860053a6a4860435'
+token = env('GIS_TOKEN')
 print(gps_point_2, gps_point_1)
 
 # import requests
@@ -52,7 +57,7 @@ from openrouteservice.directions import directions
 from openrouteservice.distance_matrix import distance_matrix
 
 coords = [[*gps_point_1], [*gps_point_2]]
-client = openrouteservice.Client(key=token) # Specify your personal API key
+client = openrouteservice.Client(key=token)  # Specify your personal API key
 # routes = directions(client, coords)
 #
 # print(routes['routes'][0])
