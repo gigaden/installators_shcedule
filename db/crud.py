@@ -52,13 +52,41 @@ async def get_filial_address(tg_id: int):
     return session.query(Users).filter(Users.tg_id == tg_id).first().filial_address
 
 
-# получаем адреса за выбранную дату
+# получаем адреса и их id за выбранную дату
 def get_addresses(tg_id: int, year: int, month: int, day: int) -> list:
     user_id = session.query(Users).filter(Users.tg_id == tg_id).first()
-    query: list = session.query(Addresses.full_address).filter(
-        Addresses.date == datetime(year, month, day) and Addresses.users_id == user_id).all()
-    return [address[0] for address in query]
+    query: list = session.query(Addresses.full_address, Addresses.id).filter(
+        Addresses.date == datetime(year, month, day) and Addresses.users_id == user_id).order_by(Addresses.id).all()
+    return query
 
 
-result = get_addresses(322908715, 2023, 8, 1)
-print(result)
+# получаем только один адрес по выбранному id
+def get_address(id_address: int) -> str:
+    return session.query(Addresses.full_address).filter(Addresses.id == id_address).first()[0]
+
+
+# удаляем выбранный адрес из бд
+async def del_address(id_address: int, tg_id: int):
+    user_id = session.query(Users).filter(Users.tg_id == tg_id).first()
+    query = session.query(Addresses).filter(Addresses.id == id_address and Addresses.users_id == user_id).one()
+    session.delete(query)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+
+
+# изменяем в бд выбранный адрес
+async def update_address(id_address: int, address: str, coordinates: tuple, full_address: str):
+    query: [Addresses] = session.query(Addresses).filter(Addresses.id == id_address).first()
+    query.address = address
+    query.coordinates = coordinates
+    query.full_address = full_address
+    session.add(query)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+
+
+

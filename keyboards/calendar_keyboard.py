@@ -4,7 +4,8 @@ import calendar
 import locale
 
 from callback_classes.callback_classes import CallBackMonthForward, CallBackMonthBack, CallBackDay, CallBackAddress, \
-    CallBackShowAddresses, CallBackCloseDay
+    CallBackShowAddresses, CallBackCloseDay, CallBackEditDay, CallBackDelAddress, CallBackUpdateAddress, \
+    CallBackFinishDay
 from lexicon.lexicon_ru import LEXICON_CALENDAR
 
 from db.crud import get_addresses
@@ -53,8 +54,31 @@ def create_edit_day_keyboard(year: int, month: int, day: int) -> InlineKeyboardM
     addresses: InlineKeyboardButton = InlineKeyboardButton(text=LEXICON_CALENDAR['show_addresses'],
                                                            callback_data=CallBackShowAddresses(year=year, month=month,
                                                                                                day=day).pack())
-    kb_builder.row(address, close, addresses, width=1)
+    finish_day: InlineKeyboardButton = InlineKeyboardButton(text=LEXICON_CALENDAR['finish_day'],
+                                                            callback_data=CallBackFinishDay(year=year, month=month,
+                                                                                                day=day).pack())
+    kb_builder.row(address, close, addresses, finish_day, width=1)
 
+    return kb_builder.as_markup()
+
+
+# клавиатура для редактирования одного выбранного дня
+def create_edit_selected_day_keyboard(tg_id: int, id_address: int, year: int, month: int, day: int):
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    close_button: InlineKeyboardButton = \
+        InlineKeyboardButton(text=LEXICON_CALENDAR['close_address_btn'],
+                             callback_data=CallBackShowAddresses(year=year,
+                                                                 month=month,
+                                                                 day=day).pack())
+    update_button: InlineKeyboardButton = \
+        InlineKeyboardButton(text=LEXICON_CALENDAR['update'],
+                             callback_data=CallBackUpdateAddress(tg_id=tg_id, id_address=id_address, year=year,
+                                                                 month=month, day=day).pack())
+    del_button: InlineKeyboardButton = \
+        InlineKeyboardButton(text=f"{LEXICON_CALENDAR['del']}",
+                             callback_data=CallBackDelAddress(tg_id=tg_id, id_address=id_address, year=year,
+                                                              month=month, day=day).pack())
+    kb_builder.row(update_button, del_button, close_button, width=1)
     return kb_builder.as_markup()
 
 
@@ -62,6 +86,23 @@ def create_edit_day_keyboard(year: int, month: int, day: int) -> InlineKeyboardM
 def create_addresses_day_keyboard(tg_id: int, year: int, month: int, day: int) -> InlineKeyboardMarkup:
     addresses: list = get_addresses(tg_id, year, month, day)
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
-    addresses_button = [InlineKeyboardButton(text=f"{LEXICON_CALENDAR['del']} {address[-50:]}", callback_data=address[:20]) for address in addresses]
+    addresses_button = [
+        InlineKeyboardButton(text=f"{address[0][-50:]}", callback_data=CallBackEditDay(
+            tg_id=tg_id, year=year, month=month, day=day, id_address=address[1]).pack()) for address in addresses]
+    close_button = InlineKeyboardButton(text=LEXICON_CALENDAR['close_address_btn'],
+                                        callback_data=CallBackDay(year=year, month=month, day=day).pack())
     kb_builder.row(*addresses_button, width=1)
+    kb_builder.row(close_button)
+    return kb_builder.as_markup()
+
+
+# создаём кнопку "закрыть" при радактировании одного адреса
+def process_close_edit_address_btn(tg_id: int, year: int, month: int, day: int):
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    close_button: InlineKeyboardButton = \
+        InlineKeyboardButton(text=LEXICON_CALENDAR['close_address_btn'],
+                             callback_data=CallBackShowAddresses(year=year,
+                                                                 month=month,
+                                                                 day=day).pack())
+    kb_builder.row(close_button)
     return kb_builder.as_markup()

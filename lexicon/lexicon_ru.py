@@ -51,10 +51,13 @@ LEXICON_CALENDAR = {
     'wrong_day': 'Выберите день в этом месяце',
     'add_address_btn': 'Добавить адрес',
     'close_address_btn': 'Закрыть',
-    'show_addresses': 'адреса за день',
-    'del': '❌',
+    'show_addresses': 'Адреса за день',
+    'del': '❌ Удалить адрес',
+    'update': 'Изменить адрес...',
+    'finish_day': 'Завершить день',
 }
 
 WORD_EXCEPTION = {
     'ш.': 'шоссе',
+    'пр-кт': 'проспект',
 }

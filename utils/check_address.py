@@ -15,7 +15,7 @@ def check_address(address: str) -> bool:
 # чистим адрес для загрузки в бд
 def prepare_address(address: str) -> str:
     # убираем через регулярку всё не нужное
-    address = re.sub(r'(Мжф,\s)|(г\.)|(пом\.\d+)', '', address)
+    address = re.sub(r'(Мжф,\s)|(г\.)|(пом\.\d+)|(\d+/\d+$)', '', address)
     # проверяем на слова и символы, которые не позволят найти верные координаты
     for word in WORD_EXCEPTION:
         if word in address:
@@ -24,6 +24,4 @@ def prepare_address(address: str) -> str:
     return address
 
 
-a = 'Мжф, Нижегородская обл, Нижний Новгород г., ш. Московское, 27А, пом.47'
-
-print(prepare_address(a))
+print(prepare_address('Мжф, Нижегородская обл, Нижний Новгород г., ул. Левобережная, 3, пом.172'))

@@ -32,3 +32,34 @@ class CallBackShowAddresses(CallbackData, prefix='show_addresses'):
 
 class CallBackCloseDay(CallbackData, prefix='close_day_btn'):
     ...
+
+
+class CallBackEditDay(CallbackData, prefix='edit_day'):
+    tg_id: int
+    year: int
+    month: int
+    day: int
+    id_address: int
+
+
+class CallBackDelAddress(CallbackData, prefix='del_address'):
+    tg_id: int
+    id_address: int
+    year: int
+    month: int
+    day: int
+
+
+class CallBackUpdateAddress(CallbackData, prefix='update_address'):
+    tg_id: int
+    id_address: int
+    year: int
+    month: int
+    day: int
+
+
+class CallBackFinishDay(CallbackData, prefix='finish_day'):
+    tg_id: int
+    year: int
+    month: int
+    day: int

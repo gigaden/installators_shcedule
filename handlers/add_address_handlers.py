@@ -72,3 +72,5 @@ async def process_finish_add_address(message: Message, state: FSMContext):
     user_data: dict = await state.get_data()
     await add_address(message.from_user.id, user_data['addresses_array'])
     await state.clear()
+    await message.answer(text=LEXICON_CALENDAR['title'],
+                         reply_markup=create_calendar_keyboard(current_year, current_month))
