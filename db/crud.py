@@ -1,7 +1,10 @@
-from models import Users, session, Addresses
+from models import Users, session, Addresses, Days
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import extract
 
 from datetime import datetime
+
+import re
 
 
 # проверяем есть ли пользователь в бд
@@ -23,6 +26,11 @@ async def create_new_user(user_data: dict):
         session.commit()
     except IntegrityError:
         session.rollback()
+
+
+# получаем объект пользователя из бд
+def get_user(tg_id: int):
+    return session.query(Users).filter(Users.tg_id == tg_id).first()
 
 
 # добавляем адрес в бд
@@ -89,4 +97,43 @@ async def update_address(id_address: int, address: str, coordinates: tuple, full
         session.rollback()
 
 
+# получаем список координат за выбранный день
+async def take_all_routs_for_day(tg_id: int, year: int, month: int, day: int):
+    user_id = session.query(Users).filter(Users.tg_id == tg_id).first()
+    query: list = session.query(Addresses.coordinates, Addresses.full_address).filter(
+        Addresses.date == datetime(year, month, day) and Addresses.users_id == user_id).order_by(Addresses.id).all()
+    all_coordinates: list = [tuple(float(re.sub(r'[\(\)]', '', coord)) for coord in coords[0].split(',')) for coords in
+                             query]
+    all_full_addresses: str = '; '.join([address[1] for address in query])
+    return all_coordinates, all_full_addresses
 
+
+# заносим пробег за день и адреса в бд
+async def add_distance_and_routes(tg_id: int, year: int, month: int, day: int, all_addresses: str, distance: float):
+    # проверяем есть ли запись за эту дату
+    query = session.query(Days).filter(Days.date == datetime(year, month, day)).first()
+    if query:
+        query.all_addresses = all_addresses
+        query.distance = distance
+        session.add(query)
+    else:
+        user = session.query(Users).filter(Users.tg_id == tg_id).first().id
+        date = datetime(year, month, day)
+        new_day = Days(
+            users_id=user, date=date, all_addresses=all_addresses, distance=distance
+        )
+        session.add(new_day)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+
+
+# получаем объекты Addresses за выбранный месяц и возвращаем список дат, адресов, расстояний
+def take_addresses_objects(tg_id: int, year: int, month: int) -> list:
+    user = session.query(Users).filter(Users.tg_id == tg_id).first()
+    query = session.query(Days).filter(
+        extract('month', Days.date) == month).filter(extract('year', Days.date) == year).filter(
+        Days.users_id == user.id).order_by(
+        Days.date).all()
+    return [[day.date.strftime('%d.%m.%Y'), day.all_addresses, day.distance] for day in query]

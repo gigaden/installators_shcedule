@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 
 from aiogram.types import CallbackQuery, Message
 
-from db.crud import check_user_in_db, get_address, del_address, update_address
+from db.crud import check_user_in_db, get_address, del_address, update_address, take_all_routs_for_day
 
 from lexicon.lexicon_ru import LEXICON_RU, LEXICON_CALENDAR
 
@@ -15,12 +15,14 @@ from keyboards.calendar_keyboard import create_calendar_keyboard, create_edit_da
     create_addresses_day_keyboard, create_edit_selected_day_keyboard, process_close_edit_address_btn
 
 from callback_classes.callback_classes import CallBackMonthForward, CallBackMonthBack, CallBackDay, \
-    CallBackShowAddresses, CallBackCloseDay, CallBackEditDay, CallBackDelAddress, CallBackUpdateAddress
+    CallBackShowAddresses, CallBackCloseDay, CallBackEditDay, CallBackDelAddress, CallBackUpdateAddress, \
+    CallBackFinishDay
 
 from settings import current_year, current_month
 
 from utils.check_address import check_address, prepare_address
 from utils.get_coordinates import get_coordinates
+from utils.finish_day import finish_day
 
 router: Router = Router()
 
@@ -135,7 +137,7 @@ async def process_change_address(message: Message, state: FSMContext):
 
 # хэндлер сработае при нажатии на кнопку "удалить адрес"
 @router.callback_query(CallBackDelAddress.filter(), StateFilter(FSMEditAddress.edit_address))
-async def process_del_address(callback: CallbackQuery, callback_data: CallBackDelAddress, state: FSMContext):
+async def process_del_address(callback: CallbackQuery, callback_data: CallBackDelAddress):
     await del_address(callback_data.id_address, callback_data.tg_id)
     await callback.message.edit_text(text=f'Адреса за {callback_data.day}'
                                           f'/{callback_data.month}'
@@ -146,4 +148,10 @@ async def process_del_address(callback: CallbackQuery, callback_data: CallBackDe
                                                                                 callback_data.day))
 
 
-# сработает при нажатии кнопки "Завершить день", рассчитает и занесёт в БД маршру за день
+# сработает при нажатии кнопки "Завершить день", рассчитает и занесёт в БД маршрут за день
+@router.callback_query(CallBackFinishDay.filter())
+async def process_finish_day(callback: CallbackQuery, callback_data: CallBackFinishDay):
+    await finish_day(callback.from_user.id, callback_data.year, callback_data.month,
+                     callback_data.day)
+    await callback.message.edit_text(text=f'{LEXICON_CALENDAR["finish_day_done"]}',
+                                     reply_markup=create_calendar_keyboard(current_year, current_month))

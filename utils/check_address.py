@@ -22,6 +22,3 @@ def prepare_address(address: str) -> str:
             address = address.replace(word, WORD_EXCEPTION[word])
 
     return address
-
-
-print(prepare_address('Мжф, Нижегородская обл, Нижний Новгород г., ул. Левобережная, 3, пом.172'))

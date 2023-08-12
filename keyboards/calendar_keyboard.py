@@ -56,7 +56,7 @@ def create_edit_day_keyboard(year: int, month: int, day: int) -> InlineKeyboardM
                                                                                                day=day).pack())
     finish_day: InlineKeyboardButton = InlineKeyboardButton(text=LEXICON_CALENDAR['finish_day'],
                                                             callback_data=CallBackFinishDay(year=year, month=month,
-                                                                                                day=day).pack())
+                                                                                            day=day).pack())
     kb_builder.row(address, close, addresses, finish_day, width=1)
 
     return kb_builder.as_markup()

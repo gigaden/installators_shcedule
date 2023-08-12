@@ -36,6 +36,7 @@ class Days(Base):
     id = Column(Integer, primary_key=True)
     users_id = Column(Integer, ForeignKey('users.id'))
     date = Column(DateTime, nullable=False)
+    all_addresses = Column(String, nullable=False)
     distance = Column(Integer, nullable=True, default=0)
 
 
@@ -48,5 +49,4 @@ class Addresses(Base):
     coordinates = Column(String(100), nullable=False)
     full_address = Column(String(300), nullable=False)
 
-
-#Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)

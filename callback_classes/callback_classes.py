@@ -59,7 +59,6 @@ class CallBackUpdateAddress(CallbackData, prefix='update_address'):
 
 
 class CallBackFinishDay(CallbackData, prefix='finish_day'):
-    tg_id: int
     year: int
     month: int
     day: int
