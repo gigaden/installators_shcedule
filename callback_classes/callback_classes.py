@@ -62,3 +62,17 @@ class CallBackFinishDay(CallbackData, prefix='finish_day'):
     year: int
     month: int
     day: int
+
+
+# класс для кнопки отмена в состоянии внесения адреса
+class CallBackCancel(CallbackData, prefix='cancel'):
+    ...
+
+# класс для кнопки получения адреса филиала
+class CallBackFilialAddress(CallbackData, prefix='filial_address'):
+    tg_id: int
+
+
+#
+class CallBackSaveAddress(CallbackData, prefix='saveaddress'):
+    ...

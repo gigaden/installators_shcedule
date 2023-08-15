@@ -3,6 +3,7 @@ from db.crud import take_addresses_objects, get_user
 import locale
 import calendar
 from datetime import date
+from settings import GAZ_TAX
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -23,11 +24,11 @@ def make_month_report(tg_id: int, year: int, month: int):
     # формируем контекст для отправки в шаблон
     context = {
         'days': days_objects,
-        'gaz_tax': 9.73,
+        'gaz_tax': GAZ_TAX,
         'total_distance': total_distance,
         'user': user,
         'month': months[month],
-        'year': current_date.year,
+        'year': year,
         'date': [current_date.day, calendar.month_name[current_date.month], current_date.year]
     }
 
