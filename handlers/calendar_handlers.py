@@ -1,13 +1,14 @@
-from aiogram import Router, F
-from aiogram.filters import Command, Text, StateFilter
+import os
+from aiogram import Router
+from aiogram.filters import Command, StateFilter
 
 from aiogram.fsm.state import default_state
 from fsm.edit_address_fsm import FSMEditAddress
 from aiogram.fsm.context import FSMContext
 
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, FSInputFile
 
-from db.crud import check_user_in_db, get_address, del_address, update_address, take_all_routs_for_day
+from db.crud import check_user_in_db, get_address, del_address, update_address
 
 from lexicon.lexicon_ru import LEXICON_RU, LEXICON_CALENDAR
 
@@ -16,13 +17,14 @@ from keyboards.calendar_keyboard import create_calendar_keyboard, create_edit_da
 
 from callback_classes.callback_classes import CallBackMonthForward, CallBackMonthBack, CallBackDay, \
     CallBackShowAddresses, CallBackCloseDay, CallBackEditDay, CallBackDelAddress, CallBackUpdateAddress, \
-    CallBackFinishDay
+    CallBackFinishDay, CallBackMakeReport
 
 from settings import current_year, current_month
 
 from utils.check_address import check_address, prepare_address
 from utils.get_coordinates import get_coordinates
 from utils.finish_day import finish_day
+from utils.make_month_report import make_month_report
 
 router: Router = Router()
 
@@ -66,7 +68,7 @@ async def process_selected_day(callback: CallbackQuery, callback_data: CallBackD
 
 # хэндлер отрабатывает при нажатии на кнопку "адреса за день" и выводит адреса за выбранную дату
 @router.callback_query(CallBackShowAddresses.filter())
-async def process_address_command(callback: CallbackQuery, callback_data: CallBackShowAddresses, state: FSMContext):
+async def process_address_command(callback: CallbackQuery, callback_data: CallBackShowAddresses):
     tg_id = callback.from_user.id
     await callback.message.edit_text(text=f'Адреса за {callback_data.day}'
                                           f'/{callback_data.month}'
@@ -79,7 +81,7 @@ async def process_address_command(callback: CallbackQuery, callback_data: CallBa
 
 # хэндлер отрабатывает при нажатии на кнопку "Закрыть" и возвращает календарь
 @router.callback_query(CallBackCloseDay.filter())
-async def process_close_day(callback: CallbackQuery, state: FSMContext):
+async def process_close_day(callback: CallbackQuery):
     await callback.message.edit_text(text=LEXICON_CALENDAR['title'],
                                      reply_markup=create_calendar_keyboard(current_year, current_month))
 
@@ -159,3 +161,20 @@ async def process_finish_day(callback: CallbackQuery, callback_data: CallBackFin
         await callback.message.edit_text(text=f'{LEXICON_CALENDAR["not_enough_addresses"]}',
                                          reply_markup=create_edit_day_keyboard(callback_data.year, callback_data.month,
                                                                                callback_data.day))
+
+
+# сработает при нажатии кнопки сформировать отчёт
+@router.callback_query(CallBackMakeReport.filter())
+async def process_make_report(callback: CallbackQuery, callback_data: CallBackMakeReport):
+    # создаём отчёт за выбранный месяц и получаем путь к файлу
+    file_address: str = await make_month_report(callback.from_user.id, callback_data.year, callback_data.month)
+    fs_input: FSInputFile = FSInputFile(path=file_address)
+
+    # отправляем его пользователю
+    await callback.message.edit_text(text=LEXICON_CALENDAR['month_report_done'])
+    await callback.message.answer_document(document=fs_input)
+    await callback.message.answer(text=LEXICON_CALENDAR['title'],
+                                  reply_markup=create_calendar_keyboard(current_year, current_month))
+
+    # файл отправлен, можно его удалить из папки
+    os.remove(file_address)

@@ -68,11 +68,18 @@ class CallBackFinishDay(CallbackData, prefix='finish_day'):
 class CallBackCancel(CallbackData, prefix='cancel'):
     ...
 
+
 # класс для кнопки получения адреса филиала
 class CallBackFilialAddress(CallbackData, prefix='filial_address'):
     tg_id: int
 
 
-#
+# для передачи данных при нажатии сохранения адресов
 class CallBackSaveAddress(CallbackData, prefix='saveaddress'):
     ...
+
+
+# для передачи данных по кнопке отчёта за месяц
+class CallBackMakeReport(CallbackData, prefix='make_report'):
+    year: int
+    month: int

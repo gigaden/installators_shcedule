@@ -8,8 +8,8 @@ from settings import GAZ_TAX
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 
-def make_month_report(tg_id: int, year: int, month: int):
-    tpl = DocxTemplate('../templates/month_report_template.docx')
+async def make_month_report(tg_id: int, year: int, month: int) -> str:
+    tpl = DocxTemplate('templates/month_report_template.docx')
 
     # получаем объекты Addresses, Users
     days_objects = take_addresses_objects(tg_id, year, month)
@@ -34,4 +34,8 @@ def make_month_report(tg_id: int, year: int, month: int):
 
     # рендерим в шаблон и сохраняем
     tpl.render(context)
-    tpl.save(f'../templates/output/{user.fio.split(" ")[0]}_{month}_{year}.docx')
+    file_address: str = f'templates/output/{user.fio.split(" ")[0]}_{month}_{year}.docx'
+    tpl.save(file_address)
+    return file_address
+
+
