@@ -2,7 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from config_data.config import Config, load_config
-from handlers import register_handlers, add_address_handlers, calendar_handlers, other_handlers
+from handlers import register_handlers, add_address_handlers, calendar_handlers, other_handlers, user_handlers
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from keyboards.main_menu import set_main_menu
@@ -27,6 +27,7 @@ async def main():
 
     await set_main_menu(bot)
 
+    dp.include_router(user_handlers.router)
     dp.include_router(register_handlers.router)
     dp.include_router(add_address_handlers.router)
     dp.include_router(calendar_handlers.router)

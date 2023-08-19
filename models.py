@@ -49,4 +49,4 @@ class Addresses(Base):
     coordinates = Column(String(100), nullable=False)
     full_address = Column(String(300), nullable=False)
 
-# Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine) # Убрать комментарий, если нужно создать таблицы в БД
