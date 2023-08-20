@@ -61,7 +61,7 @@ async def process_selected_day(callback: CallbackQuery, callback_data: CallBackD
     if callback_data.day == 0:
         await callback.answer(text=LEXICON_CALENDAR['wrong_day'], show_alert=True)
     else:
-        await callback.message.edit_text(text=f"Выбран {callback_data.day}.{callback_data.month}.{callback_data.year}",
+        await callback.message.edit_text(text=f"Выбран {callback_data.day:02d}.{callback_data.month:02d}.{callback_data.year}",
                                          reply_markup=create_edit_day_keyboard(callback_data.year, callback_data.month,
                                                                                callback_data.day))
 

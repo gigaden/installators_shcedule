@@ -8,7 +8,7 @@ from fsm.user_register_fsm import FSMFillAddresses
 from aiogram.types import CallbackQuery, Message
 from lexicon.lexicon_ru import LEXICON_ADDRESS, LEXICON_CALENDAR
 
-from keyboards.calendar_keyboard import create_calendar_keyboard
+from keyboards.calendar_keyboard import create_calendar_keyboard, create_edit_day_keyboard
 from keyboards.addresses_keyboard import create_add_addresses_keyboard
 
 from settings import current_year, current_month
@@ -88,8 +88,10 @@ async def process_finish_add_address(callback: CallbackQuery, state: FSMContext,
         await callback.message.answer(text=LEXICON_ADDRESS['/saveaddress'])
         await add_address(callback.from_user.id, user_data['addresses_array'])
         await state.clear()
-        await callback.message.answer(text=LEXICON_CALENDAR['title'],
-                                      reply_markup=create_calendar_keyboard(current_year, current_month))
+        year, month, day = user_data['addresses_array'][0].year, user_data['addresses_array'][0].month, \
+            user_data['addresses_array'][0].day
+        await callback.message.answer(text=f"Выбран {day:02d}.{month:02d}.{year}",
+                                      reply_markup=create_edit_day_keyboard(year=year, month=month, day=day))
     else:
         await callback.message.answer(text=LEXICON_ADDRESS['no_address_added'],
                                       reply_markup=create_add_addresses_keyboard(callback.from_user.id))
