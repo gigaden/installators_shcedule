@@ -2,7 +2,7 @@ LEXICON_RU = {
     '/start': 'Для использования бота вам нужно зарегистрироваться\n\n'
               'Чтобы это сделать отправьте комманду /fillform',
     '/help': 'Полноценная '
-             '<a href="https://github.com/gigaden/installators_shcedule/manual_for_installators.pdf">'
+             '<a href="https://github.com/gigaden/installators_shcedule/blob/main/manual_for_installators.pdf">'
              'инструкция с картинками лежит тут</a>.\n\n'
              '<u><b>Если вы не зарегистрированы</b>, для начала работы:</u>\n\n'
              '<i>- Отправьте команду /start, или нажмите кнопку</i>.\n'
