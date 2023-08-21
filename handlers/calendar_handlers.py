@@ -61,20 +61,21 @@ async def process_selected_day(callback: CallbackQuery, callback_data: CallBackD
     if callback_data.day == 0:
         await callback.answer(text=LEXICON_CALENDAR['wrong_day'], show_alert=True)
     else:
-        await callback.message.edit_text(text=f"Выбран {callback_data.day:02d}.{callback_data.month:02d}.{callback_data.year}",
-                                         reply_markup=create_edit_day_keyboard(callback_data.year, callback_data.month,
-                                                                               callback_data.day))
+        await callback.message.edit_text(
+            text=f"Выбран {callback_data.day:02d}.{callback_data.month:02d}.{callback_data.year}",
+            reply_markup=create_edit_day_keyboard(callback_data.year, callback_data.month,
+                                                  callback_data.day))
 
 
 # хэндлер отрабатывает при нажатии на кнопку "адреса за день" и выводит адреса за выбранную дату
 @router.callback_query(CallBackShowAddresses.filter())
 async def process_address_command(callback: CallbackQuery, callback_data: CallBackShowAddresses):
-    tg_id = callback.from_user.id
     await callback.message.edit_text(text=f'Адреса за {callback_data.day}'
                                           f'/{callback_data.month}'
                                           f'/{callback_data.year}\n'
                                           f'Нажмите на адрес, чтобы удалить, или изменить',
-                                     reply_markup=create_addresses_day_keyboard(tg_id, callback_data.year,
+                                     reply_markup=create_addresses_day_keyboard(callback.from_user.id,
+                                                                                callback_data.year,
                                                                                 callback_data.month,
                                                                                 callback_data.day))
 
@@ -93,7 +94,7 @@ async def process_edit_day(callback: CallbackQuery, callback_data: CallBackEditD
     await state.set_state(FSMEditAddress.edit_address)
     await callback.message.edit_text(text=f"Адрес для редактирования:\n"
                                           f"{address}",
-                                     reply_markup=create_edit_selected_day_keyboard(callback_data.tg_id,
+                                     reply_markup=create_edit_selected_day_keyboard(callback.from_user.id,
                                                                                     callback_data.id_address,
                                                                                     callback_data.year,
                                                                                     callback_data.month,
@@ -105,13 +106,13 @@ async def process_edit_day(callback: CallbackQuery, callback_data: CallBackEditD
 @router.callback_query(CallBackUpdateAddress.filter())
 async def process_update_address(callback: CallbackQuery, callback_data: CallBackDelAddress, state: FSMContext):
     await state.update_data(id_address=callback_data.id_address)
-    await state.update_data(tg_id=callback_data.tg_id)
+    await state.update_data(tg_id=callback.from_user.id)
     await state.update_data(year=callback_data.year)
     await state.update_data(month=callback_data.month)
     await state.update_data(day=callback_data.day)
     await callback.message.edit_text(text="Введите новый адрес и нажмите отправить\n"
                                           "для выхода нажмите 'Закрыть'",
-                                     reply_markup=process_close_edit_address_btn(callback_data.tg_id,
+                                     reply_markup=process_close_edit_address_btn(callback.from_user.id,
                                                                                  callback_data.year,
                                                                                  callback_data.month,
                                                                                  callback_data.day))
@@ -140,12 +141,13 @@ async def process_change_address(message: Message, state: FSMContext):
 # хэндлер сработае при нажатии на кнопку "удалить адрес"
 @router.callback_query(CallBackDelAddress.filter(), StateFilter(FSMEditAddress.edit_address))
 async def process_del_address(callback: CallbackQuery, callback_data: CallBackDelAddress):
-    await del_address(callback_data.id_address, callback_data.tg_id)
+    await del_address(callback_data.id_address, callback.from_user.id)
     await callback.message.edit_text(text=f'Адреса за {callback_data.day}'
                                           f'/{callback_data.month}'
                                           f'/{callback_data.year}\n'
                                           f'Нажмите на адрес, чтобы удалить, или изменить',
-                                     reply_markup=create_addresses_day_keyboard(callback_data.tg_id, callback_data.year,
+                                     reply_markup=create_addresses_day_keyboard(callback.from_user.id,
+                                                                                callback_data.year,
                                                                                 callback_data.month,
                                                                                 callback_data.day))
 
