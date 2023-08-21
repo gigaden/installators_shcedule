@@ -103,7 +103,9 @@ async def update_address(id_address: int, address: str, coordinates: tuple, full
 async def take_all_routs_for_day(tg_id: int, year: int, month: int, day: int):
     user_id = session.query(Users).filter(Users.tg_id == tg_id).first().id
     query: list = session.query(Addresses.coordinates, Addresses.full_address).filter(
-        Addresses.date == datetime(year, month, day) and Addresses.users_id == user_id).order_by(Addresses.id).all()
+        extract('month', Addresses.date) == month).filter(extract('year', Addresses.date) == year).filter(
+        extract('day', Addresses.date) == day).filter(
+        Addresses.users_id == user_id).order_by(Addresses.id).all()
     all_coordinates: list = [tuple(float(re.sub(r'[\(\)]', '', coord)) for coord in coords[0].split(',')) for coords in
                              query]
     all_full_addresses: str = '; '.join([address[1] for address in query])
