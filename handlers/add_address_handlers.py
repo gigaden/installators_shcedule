@@ -46,7 +46,7 @@ async def process_cancel_command_state(callback: CallbackQuery, state: FSMContex
 
 @router.callback_query(CallBackFilialAddress.filter(), StateFilter(FSMFillAddresses.fill_address))
 async def process_send_filial_address(callback: CallbackQuery, state: FSMContext, callback_data: CallBackFilialAddress):
-    filial_address: str = await get_filial_address(callback_data.tg_id)
+    filial_address: str = await get_filial_address(callback.from_user.id)
     address: str = prepare_address(filial_address)
     coordinates: tuple = get_coordinates(address)
     if check_address(address) and coordinates:
