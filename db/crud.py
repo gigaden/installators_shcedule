@@ -115,13 +115,16 @@ async def take_all_routs_for_day(tg_id: int, year: int, month: int, day: int):
 # заносим пробег за день и адреса в бд
 async def add_distance_and_routes(tg_id: int, year: int, month: int, day: int, all_addresses: str, distance: float):
     # проверяем есть ли запись за эту дату
-    query = session.query(Days).filter(Days.date == datetime(year, month, day)).first()
+    user = session.query(Users).filter(Users.tg_id == tg_id).first().id
+    query = session.query(Days).filter(
+        extract('month', Days.date) == month).filter(extract('year', Days.date) == year).filter(
+        extract('day', Days.date) == day).filter(
+        Days.users_id == user).first()
     if query:
         query.all_addresses = all_addresses
         query.distance = distance
         session.add(query)
     else:
-        user = session.query(Users).filter(Users.tg_id == tg_id).first().id
         date = datetime(year, month, day)
         new_day = Days(
             users_id=user, date=date, all_addresses=all_addresses, distance=distance
