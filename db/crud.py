@@ -64,7 +64,7 @@ async def get_filial_address(tg_id: int):
 def get_addresses(tg_id: int, year: int, month: int, day: int) -> list:
     user_id = session.query(Users).filter(Users.tg_id == tg_id).first()
     query: list = session.query(Addresses.full_address, Addresses.id).filter(
-        Addresses.date == datetime(year, month, day) and Addresses.users_id == user_id).order_by(Addresses.id).all()
+        Addresses.date == datetime(year, month, day)).filter(Addresses.users_id == user_id).order_by(Addresses.id).all()
     return query
 
 
@@ -137,3 +137,4 @@ def take_addresses_objects(tg_id: int, year: int, month: int) -> list:
         Days.users_id == user.id).order_by(
         Days.date).all()
     return [[day.date.strftime('%d.%m.%Y'), day.all_addresses, day.distance] for day in query]
+
