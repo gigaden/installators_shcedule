@@ -13,6 +13,3 @@ def get_coordinates(address: str):
         return coordinates
     except:
         return False
-
-
-# print(get_coordinates('Нижний Новгород  мкр. 6-й, 45,'))
