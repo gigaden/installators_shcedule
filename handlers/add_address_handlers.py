@@ -43,7 +43,7 @@ async def process_cancel_command_state(callback: CallbackQuery, state: FSMContex
     await callback.message.answer(text=LEXICON_CALENDAR['title'],
                                   reply_markup=create_calendar_keyboard(current_year, current_month))
 
-
+# срабатывает на кнопку "добавить адрес филиала" и заносит его в список адресов
 @router.callback_query(CallBackFilialAddress.filter(), StateFilter(FSMFillAddresses.fill_address))
 async def process_send_filial_address(callback: CallbackQuery, state: FSMContext, callback_data: CallBackFilialAddress):
     filial_address: str = await get_filial_address(callback.from_user.id)
@@ -51,7 +51,7 @@ async def process_send_filial_address(callback: CallbackQuery, state: FSMContext
     coordinates: tuple = get_coordinates(address)
     if check_address(address) and coordinates:
         await callback.message.answer(
-            text=f"{LEXICON_ADDRESS['addresses_added']} \nкоординаты адреса {coordinates}",
+            text=f"{LEXICON_ADDRESS['addresses_added']}",
             reply_markup=create_add_addresses_keyboard(callback.from_user.id))
         full_address: str = filial_address
         user_data: dict = await state.get_data()
@@ -69,7 +69,7 @@ async def process_add_address(message: Message, state: FSMContext):
     coordinates: tuple = get_coordinates(address)
     if check_address(address) and coordinates:
         await message.answer(
-            text=f"{LEXICON_ADDRESS['addresses_added']} \nкоординаты адреса {coordinates}",
+            text=f"{LEXICON_ADDRESS['addresses_added']}",
             reply_markup=create_add_addresses_keyboard(message.from_user.id))
         full_address: str = message.text
         user_data: dict = await state.get_data()

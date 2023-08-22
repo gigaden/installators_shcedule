@@ -155,9 +155,11 @@ async def process_del_address(callback: CallbackQuery, callback_data: CallBackDe
 # сработает при нажатии кнопки "Завершить день", рассчитает и занесёт в БД маршрут за день
 @router.callback_query(CallBackFinishDay.filter())
 async def process_finish_day(callback: CallbackQuery, callback_data: CallBackFinishDay):
-    if await finish_day(callback.from_user.id, callback_data.year, callback_data.month,
-                        callback_data.day):
-        await callback.message.edit_text(text=f'{LEXICON_CALENDAR["finish_day_done"]}',
+    day_distance: float = await finish_day(callback.from_user.id, callback_data.year, callback_data.month,
+                                           callback_data.day)
+    if day_distance:
+        await callback.message.edit_text(text=f'Информация за день сохранена\nВы проехали {day_distance:.1f} км\n\n'
+                                              f'{LEXICON_CALENDAR["finish_day_done"]}',
                                          reply_markup=create_calendar_keyboard(current_year, current_month))
     else:
         await callback.message.edit_text(text=f'{LEXICON_CALENDAR["not_enough_addresses"]}',
