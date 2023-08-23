@@ -25,11 +25,14 @@ async def make_month_report(tg_id: int, year: int, month: int) -> str:
     context = {
         'days': days_objects,
         'gaz_tax': GAZ_TAX,
+        'gaz_tax_str': str(GAZ_TAX).replace('.', ','),
         'total_distance': total_distance,
         'user': user,
         'month': months[month],
         'year': year,
-        'date': [current_date.day, calendar.month_name[current_date.month], current_date.year]
+        'date': [current_date.day, calendar.month_name[current_date.month], current_date.year],
+        'full_tax_ru': int((total_distance * GAZ_TAX) // 1),
+        'full_tax_kop': round(((total_distance * GAZ_TAX) % 1) * 100),
     }
 
     # рендерим в шаблон и сохраняем
@@ -37,5 +40,3 @@ async def make_month_report(tg_id: int, year: int, month: int) -> str:
     file_address: str = f'templates/output/{user.fio.split(" ")[0]}_{month}_{year}.docx'
     tpl.save(file_address)
     return file_address
-
-
