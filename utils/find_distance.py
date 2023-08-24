@@ -7,7 +7,7 @@ from environs import Env
 
 env = Env()
 env.read_env()
-token = env('GIS_TOKEN')
+token = env("GIS_TOKEN")
 
 
 # получаем через api пройденное расстояние
@@ -16,14 +16,18 @@ def find_distance(coordinates: list[tuple]) -> float:
     body = {"coordinates": coordinates}
 
     headers = {
-        'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-        'Authorization': '5b3ce3597851110001cf6248d30dd111ec434d0d860053a6a4860435',
-        'Content-Type': 'application/json; charset=utf-8'
+        "Accept": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8",
+        "Authorization": "5b3ce3597851110001cf6248d30dd111ec434d0d860053a6a4860435",
+        "Content-Type": "application/json; charset=utf-8",
     }
-    call = requests.post('https://api.openrouteservice.org/v2/directions/driving-car/json', json=body, headers=headers)
+    call = requests.post(
+        "https://api.openrouteservice.org/v2/directions/driving-car/json",
+        json=body,
+        headers=headers,
+    )
 
     routes = json.loads(call.text)
-    total_distance = routes['routes'][0]['summary']['distance'] / 1000
+    total_distance = routes["routes"][0]["summary"]["distance"] / 1000
     return total_distance
 
 

@@ -9,14 +9,15 @@ from environs import Env
 env = Env()
 env.read_env()
 engine = create_engine(
-    f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}")
+    f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}"
+)
 session: scoped_session = scoped_session(sessionmaker(bind=engine))
 Base: declarative_base = declarative_base()
 Base.query = session.query_property()
 
 
 class Users(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     tg_id = Column(Integer, nullable=False)
     fio = Column(String(300), nullable=False)
@@ -27,23 +28,23 @@ class Users(Base):
     filial_address = Column(String(300), nullable=True)
     created_on = Column(DateTime(), default=datetime.now)
     updated_on = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
-    days = relationship('Days')
-    addresses = relationship('Addresses')
+    days = relationship("Days")
+    addresses = relationship("Addresses")
 
 
 class Days(Base):
-    __tablename__ = 'days'
+    __tablename__ = "days"
     id = Column(Integer, primary_key=True)
-    users_id = Column(Integer, ForeignKey('users.id'))
+    users_id = Column(Integer, ForeignKey("users.id"))
     date = Column(DateTime, nullable=False)
     all_addresses = Column(String, nullable=False)
     distance = Column(Integer, nullable=True, default=0)
 
 
 class Addresses(Base):
-    __tablename__ = 'addresses'
+    __tablename__ = "addresses"
     id = Column(Integer, primary_key=True)
-    users_id = Column(Integer, ForeignKey('users.id'))
+    users_id = Column(Integer, ForeignKey("users.id"))
     date = Column(DateTime, nullable=False, default=None)
     address = Column(String(300), nullable=False)
     coordinates = Column(String(100), nullable=False)

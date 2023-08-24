@@ -14,3 +14,8 @@ class FSMFillForm(StatesGroup):
 class FSMFillAddresses(StatesGroup):
     fill_date = State()
     fill_address = State()
+
+
+# класс для редактирования данных пользователя
+class FSMEditUser(StatesGroup):
+    edit = State()
