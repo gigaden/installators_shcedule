@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="Black">
+    <option name="sdkUUID" value="e3f934bb-40d6-479d-8b34-68fcd9d759eb" />
+  </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (installators_shcedule)" project-jdk-type="Python SDK" />
 </project>

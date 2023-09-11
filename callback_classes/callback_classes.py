@@ -94,3 +94,9 @@ class CallBackEditUser(CallbackData, prefix="edit_user"):
 # для фильтрации кнопки отмены редактирования поля юзера
 class CallBackCancelEditField(CallbackData, prefix="cancel_edit_field"):
     ...
+
+
+# для отображения статистики для админов
+class CallBackStatistic(CallbackData, prefix="statistic"):
+    year: int
+    month: int

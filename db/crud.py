@@ -1,7 +1,8 @@
-import models
+from sqlalchemy.sql.functions import count
+
 from models import Users, session, Addresses, Days
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import extract
+from sqlalchemy import extract, select
 
 from datetime import datetime
 
@@ -106,7 +107,7 @@ async def del_address(id_address: int, tg_id: int):
 
 # изменяем в бд выбранный адрес
 async def update_address(
-    id_address: int, address: str, coordinates: tuple, full_address: str
+        id_address: int, address: str, coordinates: tuple, full_address: str
 ):
     query: [Addresses] = (
         session.query(Addresses).filter(Addresses.id == id_address).first()
@@ -143,7 +144,7 @@ async def take_all_routs_for_day(tg_id: int, year: int, month: int, day: int):
 
 # заносим пробег за день и адреса в бд
 async def add_distance_and_routes(
-    tg_id: int, year: int, month: int, day: int, all_addresses: str, distance: float
+        tg_id: int, year: int, month: int, day: int, all_addresses: str, distance: float
 ):
     # проверяем есть ли запись за эту дату
     user = session.query(Users).filter(Users.tg_id == tg_id).first().id
@@ -197,3 +198,12 @@ async def edit_user_field(tg_id: int, field_name: str, new_data: str):
         session.commit()
     except IntegrityError:
         session.rollback()
+
+
+# статистика для суперадмина
+async def get_super_statistic():
+    users_count = session.query(Users).count()
+    query_users_days = select(Users.fio, count(Days.date)).join(Users.days).group_by(Users.fio)
+    users_days = session.execute(query_users_days).all()
+
+    return users_count, users_days

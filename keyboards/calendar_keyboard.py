@@ -15,10 +15,12 @@ from callback_classes.callback_classes import (
     CallBackUpdateAddress,
     CallBackFinishDay,
     CallBackMakeReport,
+    CallBackStatistic,
 )
 from lexicon.lexicon_ru import LEXICON_CALENDAR
 
 from db.crud import get_addresses
+
 
 locale.setlocale(locale.LC_ALL, "ru_RU.UTF-8")
 
@@ -64,9 +66,14 @@ def create_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
             callback_data=CallBackMonthForward(year=year, month=month).pack(),
         ),
     )
+    statistic: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_CALENDAR["statistic"],
+        callback_data=CallBackStatistic(year=year, month=month).pack(),
+    )
     kb_builder.row(*day_abbr, width=7)
     kb_builder.row(*buttons, width=7)
     kb_builder.row(make_report, width=1)
+    kb_builder.row(statistic, width=1)
 
     return kb_builder.as_markup()
 

@@ -1,3 +1,4 @@
+import calendar
 import os
 from aiogram import Router
 from aiogram.filters import Command, StateFilter
@@ -8,7 +9,14 @@ from aiogram.fsm.context import FSMContext
 
 from aiogram.types import CallbackQuery, Message, FSInputFile
 
-from db.crud import check_user_in_db, get_address, del_address, update_address
+from db.crud import (
+    check_user_in_db,
+    get_address,
+    del_address,
+    update_address,
+    take_addresses_objects,
+    get_super_statistic,
+)
 
 from lexicon.lexicon_ru import LEXICON_RU, LEXICON_CALENDAR
 
@@ -31,14 +39,20 @@ from callback_classes.callback_classes import (
     CallBackUpdateAddress,
     CallBackFinishDay,
     CallBackMakeReport,
+    CallBackStatistic,
 )
 
-from settings import current_year, current_month
+from settings import current_year, current_month, GAZ_TAX
 
 from utils.check_address import check_address, prepare_address
 from utils.get_coordinates import get_coordinates
 from utils.finish_day import finish_day
 from utils.make_month_report import make_month_report
+
+from environs import Env
+
+env = Env()
+env.read_env()
 
 router: Router = Router()
 
@@ -58,7 +72,7 @@ async def process_calendar_command(message: Message):
 # хэндлер будет срабатывать на кнопку >>> и выводить следующий месяц
 @router.callback_query(CallBackMonthForward.filter())
 async def process_next_month(
-    callback: CallbackQuery, callback_data: CallBackMonthForward
+        callback: CallbackQuery, callback_data: CallBackMonthForward
 ):
     await callback.message.edit_text(
         text=LEXICON_CALENDAR["title"],
@@ -96,13 +110,13 @@ async def process_selected_day(callback: CallbackQuery, callback_data: CallBackD
 # хэндлер отрабатывает при нажатии на кнопку "адреса за день" и выводит адреса за выбранную дату
 @router.callback_query(CallBackShowAddresses.filter())
 async def process_address_command(
-    callback: CallbackQuery, callback_data: CallBackShowAddresses
+        callback: CallbackQuery, callback_data: CallBackShowAddresses
 ):
     await callback.message.edit_text(
         text=f"Адреса за {callback_data.day}"
-        f"/{callback_data.month}"
-        f"/{callback_data.year}\n"
-        f"Нажмите на адрес, чтобы удалить, или изменить",
+             f"/{callback_data.month}"
+             f"/{callback_data.year}\n"
+             f"Нажмите на адрес, чтобы удалить, или изменить",
         reply_markup=create_addresses_day_keyboard(
             callback.from_user.id,
             callback_data.year,
@@ -124,7 +138,7 @@ async def process_close_day(callback: CallbackQuery):
 # хэндлер отрабатывает на редактирование выбранного дня при нажатии на кнопку с адресом
 @router.callback_query(CallBackEditDay.filter())
 async def process_edit_day(
-    callback: CallbackQuery, callback_data: CallBackEditDay, state: FSMContext
+        callback: CallbackQuery, callback_data: CallBackEditDay, state: FSMContext
 ):
     address = get_address(callback_data.id_address)
     await state.set_state(FSMEditAddress.edit_address)
@@ -143,7 +157,7 @@ async def process_edit_day(
 # хэндлер в состоянии редактирования дня ловит адрес из сообщения, проверяет его и изменяет в бд
 @router.callback_query(CallBackUpdateAddress.filter())
 async def process_update_address(
-    callback: CallbackQuery, callback_data: CallBackDelAddress, state: FSMContext
+        callback: CallbackQuery, callback_data: CallBackDelAddress, state: FSMContext
 ):
     await state.update_data(id_address=callback_data.id_address)
     await state.update_data(tg_id=callback.from_user.id)
@@ -175,9 +189,9 @@ async def process_change_address(message: Message, state: FSMContext):
         )
     await message.answer(
         text=f'Адреса за {user_data["day"]}'
-        f'/{user_data["month"]}'
-        f'/{user_data["year"]}\n'
-        f"Нажмите на адрес, чтобы удалить, или изменить",
+             f'/{user_data["month"]}'
+             f'/{user_data["year"]}\n'
+             f"Нажмите на адрес, чтобы удалить, или изменить",
         reply_markup=create_addresses_day_keyboard(
             user_data["tg_id"], user_data["year"], user_data["month"], user_data["day"]
         ),
@@ -190,14 +204,14 @@ async def process_change_address(message: Message, state: FSMContext):
     CallBackDelAddress.filter(), StateFilter(FSMEditAddress.edit_address)
 )
 async def process_del_address(
-    callback: CallbackQuery, callback_data: CallBackDelAddress
+        callback: CallbackQuery, callback_data: CallBackDelAddress
 ):
     await del_address(callback_data.id_address, callback.from_user.id)
     await callback.message.edit_text(
         text=f"Адреса за {callback_data.day}"
-        f"/{callback_data.month}"
-        f"/{callback_data.year}\n"
-        f"Нажмите на адрес, чтобы удалить, или изменить",
+             f"/{callback_data.month}"
+             f"/{callback_data.year}\n"
+             f"Нажмите на адрес, чтобы удалить, или изменить",
         reply_markup=create_addresses_day_keyboard(
             callback.from_user.id,
             callback_data.year,
@@ -219,7 +233,7 @@ async def process_finish_day(callback: CallbackQuery, callback_data: CallBackFin
     if day_distance:
         await callback.message.edit_text(
             text=f"Информация за день сохранена\nВы проехали {day_distance:.1f} км\n\n"
-            f'{LEXICON_CALENDAR["finish_day_done"]}',
+                 f'{LEXICON_CALENDAR["finish_day_done"]}',
             reply_markup=create_calendar_keyboard(current_year, current_month),
         )
     else:
@@ -234,7 +248,7 @@ async def process_finish_day(callback: CallbackQuery, callback_data: CallBackFin
 # сработает при нажатии кнопки сформировать отчёт
 @router.callback_query(CallBackMakeReport.filter())
 async def process_make_report(
-    callback: CallbackQuery, callback_data: CallBackMakeReport
+        callback: CallbackQuery, callback_data: CallBackMakeReport
 ):
     # создаём отчёт за выбранный месяц и получаем путь к файлу
     file_address: str = await make_month_report(
@@ -252,3 +266,43 @@ async def process_make_report(
 
     # файл отправлен, можно его удалить из папки
     os.remove(file_address)
+
+
+# отдаём пользователю статистику
+@router.callback_query(CallBackStatistic.filter())
+async def process_get_statistic(
+        callback: CallbackQuery, callback_data: CallBackStatistic
+):
+    query: list = take_addresses_objects(
+        tg_id=callback.from_user.id,
+        year=callback_data.year,
+        month=callback_data.month,
+    )
+    if len(query) > 0:
+        await callback.message.edit_text(
+            text=f"Статистика за {calendar.month_abbr[callback_data.month].capitalize()}. {callback_data.year}:\n\n"
+                 f"Смен отработано: {len(query)}\n"
+                 f"Пробег за месяц: {sum(i[2] for i in query)} км\n"
+                 f"Потрачено топлива: {(sum(i[2] for i in query) * GAZ_TAX):.2f} руб.\n"
+                 f"Адресов за месяц: {sum(len(i[1].split(';')) for i in query)}\n"
+                 f"В среднем адресов в день: {(sum(len(i[1].split(';')) for i in query) / len(query)):.1f}\n\n"
+        )
+    elif len(query) == 0:
+        await callback.message.edit_text(
+            text=f"Статистика за {calendar.month_abbr[callback_data.month].capitalize()}. {callback_data.year}:\n\n"
+                 f"В базе нет завершённых дней за этот месяц:\n"
+                 f"- возможно вы не добавили ни одного адреса.\n"
+                 f'- либо не нажимали "Завершить день".\n\n'
+        )
+    if str(callback.from_user.id) in env("ADMINS_ID").split():
+        users_count, users_days = await get_super_statistic()
+        newline = "\n"
+        await callback.message.answer(text=f'------------------------------\n'
+                                           f'Количество пользователей в БД: {users_count}\n'
+                                           f'Пользователь - завершённых дней:\n'
+                                           f'{newline.join(f"{q[0]} - {q[1]}" for q in users_days)}')
+
+    await callback.message.answer(
+        text=LEXICON_CALENDAR["title"],
+        reply_markup=create_calendar_keyboard(current_year, current_month),
+    )
