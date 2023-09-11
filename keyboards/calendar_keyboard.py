@@ -21,6 +21,8 @@ from lexicon.lexicon_ru import LEXICON_CALENDAR
 
 from db.crud import get_addresses
 
+from settings import current_date
+
 
 locale.setlocale(locale.LC_ALL, "ru_RU.UTF-8")
 
@@ -42,7 +44,8 @@ def create_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
         for d in w:
             buttons.append(
                 InlineKeyboardButton(
-                    text=d if d != 0 else " ",
+                    # text=d if d != 0 else " ",
+                    text=f"'{d}'" if d == current_date.day and month == current_date.month else (d if d != 0 else " "),
                     callback_data=CallBackDay(year=year, month=month, day=d).pack(),
                 )
             )
