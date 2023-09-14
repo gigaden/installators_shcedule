@@ -23,7 +23,6 @@ from db.crud import get_addresses
 
 from settings import current_date
 
-
 locale.setlocale(locale.LC_ALL, "ru_RU.UTF-8")
 
 
@@ -44,8 +43,8 @@ def create_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
         for d in w:
             buttons.append(
                 InlineKeyboardButton(
-                    # text=d if d != 0 else " ",
-                    text=f"'{d}'" if d == current_date.day and month == current_date.month else (d if d != 0 else " "),
+                    text=d if d != 0 else " ",
+                    # text=f"'{d}'" if d == current_date.day and month == current_date.month else (d if d != 0 else " "),
                     callback_data=CallBackDay(year=year, month=month, day=d).pack(),
                 )
             )
@@ -107,7 +106,7 @@ def create_edit_day_keyboard(year: int, month: int, day: int) -> InlineKeyboardM
 
 # клавиатура для редактирования одного выбранного дня
 def create_edit_selected_day_keyboard(
-    tg_id: int, id_address: int, year: int, month: int, day: int
+        tg_id: int, id_address: int, year: int, month: int, day: int
 ):
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
     close_button: InlineKeyboardButton = InlineKeyboardButton(
@@ -132,7 +131,7 @@ def create_edit_selected_day_keyboard(
 
 # формируем клавиатуру для показа всех адресов за выбранный день
 def create_addresses_day_keyboard(
-    tg_id: int, year: int, month: int, day: int
+        tg_id: int, year: int, month: int, day: int
 ) -> InlineKeyboardMarkup:
     addresses: list = get_addresses(tg_id, year, month, day)
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
