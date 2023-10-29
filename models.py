@@ -1,5 +1,5 @@
 import psycopg2
-from sqlalchemy import create_engine, Integer, String, Column, DateTime, ForeignKey
+from sqlalchemy import create_engine, Integer, String, Column, DateTime, ForeignKey, BigInteger
 from datetime import datetime
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker, scoped_session
 
@@ -19,7 +19,7 @@ Base.query = session.query_property()
 class Users(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    tg_id = Column(Integer, nullable=False)
+    tg_id = Column(BigInteger, nullable=False)
     fio = Column(String(300), nullable=False)
     car_num = Column(String(50), nullable=False)
     car_model = Column(String(50), nullable=False)
