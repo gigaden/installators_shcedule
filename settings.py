@@ -5,4 +5,4 @@ current_date = date.today()
 current_month = current_date.month
 current_year = current_date.year
 
-GAZ_TAX = 9.73  # стоимость 1 км пути в рублях
+GAZ_TAX = 10.71  # стоимость 1 км пути в рублях
