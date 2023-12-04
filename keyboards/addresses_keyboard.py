@@ -24,3 +24,13 @@ def create_add_addresses_keyboard(tg_id: int):
     )
     kb_builder.row(filial_address, save_address, cancel, width=1)
     return kb_builder.as_markup()
+
+# клавиатура для добавления баллов за день
+def add_scores_keyboard(tg_id: int):
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    cancel: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_ADDRESS["/cancel_add_address"],
+        callback_data=CallBackCancel().pack(),
+    )
+    kb_builder.row(cancel, width=1)
+    return kb_builder.as_markup()

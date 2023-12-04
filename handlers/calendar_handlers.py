@@ -16,6 +16,8 @@ from db.crud import (
     update_address,
     take_addresses_objects,
     get_super_statistic,
+    get_scores,
+    get_day_scores, get_price_scores,
 )
 
 from lexicon.lexicon_ru import LEXICON_RU, LEXICON_CALENDAR
@@ -221,6 +223,7 @@ async def process_del_address(
     )
 
 
+
 # сработает при нажатии кнопки "Завершить день", рассчитает и занесёт в БД маршрут за день
 @router.callback_query(CallBackFinishDay.filter())
 async def process_finish_day(callback: CallbackQuery, callback_data: CallBackFinishDay):
@@ -278,14 +281,22 @@ async def process_get_statistic(
         year=callback_data.year,
         month=callback_data.month,
     )
+    scores, count_scores = await get_scores(callback.from_user.id, callback_data.month, callback_data.year)
+    day_score: int = await get_day_scores(callback.from_user.id)
     if len(query) > 0:
+        price_scores = await get_price_scores(callback.from_user.id)
+        price_scores = price_scores[0] - price_scores[0] * 0.13
         await callback.message.edit_text(
             text=f"Статистика за {calendar.month_abbr[callback_data.month].capitalize()}. {callback_data.year}:\n\n"
                  f"Смен отработано: {len(query)}\n"
                  f"Пробег за месяц: {sum(i[2] for i in query)} км\n"
-                 f"Потрачено топлива: {(sum(i[2] for i in query) * GAZ_TAX):.2f} руб.\n"
+                 f"Затраты на топливо: {(sum(i[2] for i in query) * GAZ_TAX):.2f} руб.\n"
                  f"Адресов за месяц: {sum(len(i[1].split(';')) for i in query)}\n"
                  f"В среднем адресов в день: {(sum(len(i[1].split(';')) for i in query) / len(query)):.1f}\n\n"
+                 f"Доход(с учётом вычета 13%):\n"
+                 f"за месяц: {(scores * price_scores):.1f} руб.\n"
+                 f"за сегодня: {(day_score[0] * price_scores):.1f} руб.\n"
+                 f"средний в день: {(scores * price_scores / count_scores):.1f} руб."
         )
     elif len(query) == 0:
         await callback.message.edit_text(

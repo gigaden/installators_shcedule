@@ -38,12 +38,16 @@ def user_data_keyboard(tg_id: int):
         text=user.filial_address,
         callback_data=CallBackEditUser(tg_id=tg_id, field_name="filial_address").pack(),
     )
+    score_price: InlineKeyboardButton = InlineKeyboardButton(
+        text=f"Стоимость балла {user.score_price} руб.",
+        callback_data=CallBackEditUser(tg_id=tg_id, field_name="score_price").pack(),
+    )
 
     close: InlineKeyboardButton = InlineKeyboardButton(
         text="Закрыть редактирование", callback_data=CallBackCloseDay().pack()
     )
     kb_builder.row(
-        fio, car_num, car_model, dogovor, filial, filial_address, close, width=1
+        fio, car_num, car_model, dogovor, filial, filial_address, score_price, close, width=1
     )
     return kb_builder.as_markup()
 

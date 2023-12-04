@@ -9,6 +9,7 @@ from handlers import (
     other_handlers,
     user_handlers,
     edit_user_data_handlers,
+    add_scores_handlers,
 )
 from aiogram.fsm.storage.memory import MemoryStorage
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 async def main():
     logging.basicConfig(
         level=logging.ERROR,
-        filename="bot.log",
+        # filename="bot.log",
         format="%(filename)s:%(lineno)d #%(levelname)-8s "
         "[%(asctime)s] - %(name)s - %(message)s",
     )
@@ -40,6 +41,7 @@ async def main():
     dp.include_router(add_address_handlers.router)
     dp.include_router(calendar_handlers.router)
     dp.include_router(edit_user_data_handlers.router)
+    dp.include_router(add_scores_handlers.router)
     dp.include_router(other_handlers.router)
 
     await bot.delete_webhook(drop_pending_updates=True)

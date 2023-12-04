@@ -1,10 +1,10 @@
-from sqlalchemy.sql.functions import count
+from sqlalchemy.sql.functions import count, func
 
 from models import Users, session, Addresses, Days
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import extract, select
 
-from datetime import datetime
+from datetime import datetime, date
 
 import re
 
@@ -192,12 +192,13 @@ def take_addresses_objects(tg_id: int, year: int, month: int) -> list:
 # редактируем поле в таблице Users
 async def edit_user_field(tg_id: int, field_name: str, new_data: str):
     user: [Users] = get_user(tg_id)
-    setattr(user, field_name, new_data)
-    session.add(user)
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
+    if field_name != 'score_price' or (field_name == 'score_price' and new_data.isdigit()):
+        setattr(user, field_name, new_data)
+        session.add(user)
+        try:
+            session.commit()
+        except IntegrityError:
+            session.rollback()
 
 
 # статистика для суперадмина
@@ -207,3 +208,84 @@ async def get_super_statistic():
     users_days = session.execute(query_users_days).all()
 
     return users_count, users_days
+
+
+# получаем доход за месяц
+async def get_scores(tg_id: int, month: int, year: int):
+    user = session.query(Users).filter(Users.tg_id == tg_id).first()
+    query_sum_scores = session.query(func.sum(Days.scores)).filter(extract("month", Days.date) == month).filter(
+        extract("year", Days.date) == year).filter(Days.users_id == user.id).scalar()
+    query_count_scores = session.query(func.count(Days.scores)).filter(extract("month", Days.date) == month).filter(
+        extract("year", Days.date) == year).filter(Days.users_id == user.id).scalar()
+
+    return query_sum_scores, query_count_scores
+
+
+#  получаем доход за текущий день
+async def get_day_scores(tg_id: int):
+    current_date = date.today()
+    day: int = current_date.day
+    month: int = current_date.month
+    year: int = current_date.year
+
+    user = session.query(Users).filter(Users.tg_id == tg_id).first()
+    score: int = (
+        session.query(Days.scores)
+        .filter(extract("month", Days.date) == month)
+        .filter(extract("year", Days.date) == year)
+        .filter(extract("day", Days.date) == day)
+        .filter(Days.users_id == user.id)
+        .first()
+    )
+    return score
+
+
+#  получаем доход за выбранный день
+async def get_selected_day_scores(tg_id: int, year: int, month: int, day: int) -> float:
+    user = session.query(Users).filter(Users.tg_id == tg_id).first()
+    score: float = (
+        session.query(Days.scores)
+        .filter(extract("month", Days.date) == month)
+        .filter(extract("year", Days.date) == year)
+        .filter(extract("day", Days.date) == day)
+        .filter(Days.users_id == user.id)
+        .first()
+    )
+    return score
+
+
+# заносим в бд баллы за день
+async def insert_day_score(tg_id: int, year: int, month: int, day: int, scores: float):
+    user = session.query(Users).filter(Users.tg_id == tg_id).first()
+    query = session.query(Days).filter(extract("month", Days.date) == month).filter(
+        extract("year", Days.date) == year).filter(extract("day", Days.date) == day).filter(
+        Days.users_id == user.id).first()
+
+    query.scores = scores
+    session.add(query)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+
+
+# проверяем есть ли запись за эту дату в таблице Days
+async def check_days_in_db(
+        tg_id: int, year: int, month: int, day: int):
+    user = session.query(Users).filter(Users.tg_id == tg_id).first().id
+    query = (
+        session.query(Days)
+        .filter(extract("month", Days.date) == month)
+        .filter(extract("year", Days.date) == year)
+        .filter(extract("day", Days.date) == day)
+        .filter(Days.users_id == user)
+        .first()
+    )
+
+    return not (query is None)
+
+
+# получаем стоимость балла у пользователя из бд
+async def get_price_scores(tg_id: int):
+    price_scores = session.query(Users.score_price).filter(Users.tg_id == tg_id).first()
+    return price_scores

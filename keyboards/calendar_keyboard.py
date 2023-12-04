@@ -15,7 +15,7 @@ from callback_classes.callback_classes import (
     CallBackUpdateAddress,
     CallBackFinishDay,
     CallBackMakeReport,
-    CallBackStatistic,
+    CallBackStatistic, CallBackAddScores,
 )
 from lexicon.lexicon_ru import LEXICON_CALENDAR
 
@@ -95,11 +95,15 @@ def create_edit_day_keyboard(year: int, month: int, day: int) -> InlineKeyboardM
         text=LEXICON_CALENDAR["show_addresses"],
         callback_data=CallBackShowAddresses(year=year, month=month, day=day).pack(),
     )
+    add_scores: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_CALENDAR["add_scores"],
+        callback_data=CallBackAddScores(year=year, month=month, day=day).pack(),
+    )
     finish_day: InlineKeyboardButton = InlineKeyboardButton(
         text=LEXICON_CALENDAR["finish_day"],
         callback_data=CallBackFinishDay(year=year, month=month, day=day).pack(),
     )
-    kb_builder.row(address, close, addresses, finish_day, width=1)
+    kb_builder.row(address, close, addresses, add_scores, finish_day, width=1)
 
     return kb_builder.as_markup()
 

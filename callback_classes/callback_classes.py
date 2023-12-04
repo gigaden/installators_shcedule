@@ -58,7 +58,15 @@ class CallBackUpdateAddress(CallbackData, prefix="update_address"):
     day: int
 
 
+# класс для кнопки завершить день
 class CallBackFinishDay(CallbackData, prefix="finish_day"):
+    year: int
+    month: int
+    day: int
+
+
+# класс для кнопки добавить баллы
+class CallBackAddScores(CallbackData, prefix="add_scores"):
     year: int
     month: int
     day: int

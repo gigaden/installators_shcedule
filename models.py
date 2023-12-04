@@ -1,15 +1,16 @@
-import psycopg2
-from sqlalchemy import create_engine, Integer, String, Column, DateTime, ForeignKey, BigInteger
+from sqlalchemy import create_engine, Integer, String, Column, DateTime, ForeignKey, BigInteger, Float
 from datetime import datetime
 from sqlalchemy.orm import relationship, declarative_base, sessionmaker, scoped_session
 
 from environs import Env
 
+from settings import SCORE_PRICE
+
 # Подключение к серверу PostgreSQL на localhost с помощью psycopg2 DBAPI
 env = Env()
 env.read_env()
 engine = create_engine(
-    f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}"
+    f"postgresql+psycopg://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}"
 )
 session: scoped_session = scoped_session(sessionmaker(bind=engine))
 Base: declarative_base = declarative_base()
@@ -28,6 +29,7 @@ class Users(Base):
     filial_address = Column(String(300), nullable=True)
     created_on = Column(DateTime(), default=datetime.now)
     updated_on = Column(DateTime(), default=datetime.now, onupdate=datetime.now)
+    score_price = Column(Float, server_default=str(SCORE_PRICE))
     days = relationship("Days")
     addresses = relationship("Addresses")
 
@@ -39,6 +41,7 @@ class Days(Base):
     date = Column(DateTime, nullable=False)
     all_addresses = Column(String, nullable=False)
     distance = Column(Integer, nullable=True, default=0)
+    scores = Column(Float, nullable=True, server_default="0")
 
 
 class Addresses(Base):

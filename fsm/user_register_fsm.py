@@ -16,6 +16,11 @@ class FSMFillAddresses(StatesGroup):
     fill_address = State()
 
 
+# класс для добавления баллов за день
+class FSMFillScores(StatesGroup):
+    fill_scores = State()
+
+
 # класс для редактирования данных пользователя
 class FSMEditUser(StatesGroup):
     edit = State()
