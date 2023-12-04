@@ -4,3 +4,4 @@ venv
 .vscode/
 venv/
 __pycache__/
+bot.log

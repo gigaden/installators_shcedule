@@ -5,5 +5,6 @@ current_date = date.today()
 current_month = current_date.month
 current_year = current_date.year
 
-GAZ_TAX = 10.71 if 10 < current_month < 3 else 9.73  # стоимость 1 км пути в рублях в зависимости от месяца(лето/зима)
+# стоимость 1 км пути в рублях в зависимости от месяца(лето/зима)
+GAZ_TAX = 10.71 if current_month in (11, 12, 1, 2) else 9.73
 SCORE_PRICE = 102  # стоимость балла по умолчанию, юзер сможет потом изменить
