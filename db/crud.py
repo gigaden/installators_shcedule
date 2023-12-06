@@ -237,7 +237,7 @@ async def get_day_scores(tg_id: int):
         .filter(Days.users_id == user.id)
         .first()
     )
-    return score
+    return score if score else [0]
 
 
 #  получаем доход за выбранный день
