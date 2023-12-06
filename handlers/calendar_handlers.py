@@ -223,7 +223,6 @@ async def process_del_address(
     )
 
 
-
 # сработает при нажатии кнопки "Завершить день", рассчитает и занесёт в БД маршрут за день
 @router.callback_query(CallBackFinishDay.filter())
 async def process_finish_day(callback: CallbackQuery, callback_data: CallBackFinishDay):
@@ -293,10 +292,10 @@ async def process_get_statistic(
                  f"Затраты на топливо: {(sum(i[2] for i in query) * GAZ_TAX):.2f} руб.\n"
                  f"Адресов за месяц: {sum(len(i[1].split(';')) for i in query)}\n"
                  f"В среднем адресов в день: {(sum(len(i[1].split(';')) for i in query) / len(query)):.1f}\n\n"
-                 f"Доход(с учётом вычета 13%):\n"
-                 f"за месяц: {(scores * price_scores):.1f} руб.\n"
-                 f"за сегодня: {(day_score[0] * price_scores):.1f} руб.\n"
-                 f"средний в день: {(scores * price_scores / count_scores):.1f} руб."
+                 f"Доход (с учётом вычета 13%):\n"
+                 f" за месяц:\n  {(scores * price_scores):.1f} руб. / {scores:.1f} баллов.\n"
+                 f" за сегодня:\n  {(day_score[0] * price_scores):.1f} руб. / {day_score[0]:.1f} баллов.\n"
+                 f" средний в день:\n  {(scores * price_scores / count_scores):.1f} руб. / {scores / count_scores:.1f} баллов."
         )
     elif len(query) == 0:
         await callback.message.edit_text(

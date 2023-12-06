@@ -83,7 +83,8 @@ async def process_add_scores(message: Message, state: FSMContext):
         year, month, day = user_date["current_date"].year, user_date["current_date"].month, user_date[
             "current_date"].day
         await message.answer(
-            text=f"{LEXICON_ADDRESS['scores_added']}",
+            text=f"{LEXICON_ADDRESS['scores_added']}\n"
+                 f"Выбран {user_date['current_date'].day:02d}.{user_date['current_date'].month:02d}.{user_date['current_date'].year}",
             reply_markup=create_edit_day_keyboard(
                 year, month, day
             ),
